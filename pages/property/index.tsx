@@ -26,9 +26,7 @@ export const getStaticProps = async ({ locale }: any) => ({
 const PropertyList: NextPage = ({ initialInput, ...props }: any) => {
 	const device = useDeviceDetect();
 	const router = useRouter();
-	const [searchFilter, setSearchFilter] = useState<PropertiesInquiry>(
-		router?.query?.input ? JSON.parse(router?.query?.input as string) : initialInput,
-	);
+	const [searchFilter, setSearchFilter] = useState<PropertiesInquiry>(initialInput);
 	const [properties, setProperties] = useState<Property[]>([]);
 	const [total, setTotal] = useState<number>(0);
 	const [currentPage, setCurrentPage] = useState<number>(1);
@@ -58,13 +56,20 @@ const PropertyList: NextPage = ({ initialInput, ...props }: any) => {
 
 	/** LIFECYCLES **/
 	useEffect(() => {
-		if (router.query.input) {
-			const inputObj = JSON.parse(router?.query?.input as string);
-			setSearchFilter(inputObj);
+		if (typeof router.query.input === 'string') {
+			try {
+				const inputObj = JSON.parse(router.query.input);
+				setSearchFilter(inputObj);
+				setCurrentPage(inputObj.page || 1);
+			} catch (err) {
+				console.log('Invalid input:', router.query.input);
+				setSearchFilter(initialInput);
+				setCurrentPage(1);
+			}
+		} else {
+			setCurrentPage(searchFilter.page || 1);
 		}
-
-		setCurrentPage(searchFilter.page === undefined ? 1 : searchFilter.page);
-	}, [router]);
+	}, [router.query.input]);
 
 	useEffect(() => {
 		console.log('searchFilter', searchFilter);
@@ -87,14 +92,26 @@ const PropertyList: NextPage = ({ initialInput, ...props }: any) => {
 	};
 
 	const handlePaginationChange = async (event: ChangeEvent<unknown>, value: number) => {
-		searchFilter.page = value;
+		const newSearchFilter = {
+			...searchFilter,
+			page: value,
+		};
+
+		setSearchFilter(newSearchFilter);
+
 		await router.push(
-			`/property?input=${JSON.stringify(searchFilter)}`,
-			`/property?input=${JSON.stringify(searchFilter)}`,
+			{
+				pathname: '/property',
+				query: {
+					input: JSON.stringify(newSearchFilter),
+				},
+			},
+			undefined,
 			{
 				scroll: false,
 			},
 		);
+
 		setCurrentPage(value);
 	};
 
