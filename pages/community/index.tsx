@@ -14,7 +14,7 @@ import { BoardArticleCategory } from '../../libs/enums/board-article.enum';
 import { likeTargetBoardArticleHandler } from '../../libs/utils';
 import { useMutation, useQuery } from '@apollo/client';
 import { LIKE_TARGET_BOARD_ARTICLE } from '../../apollo/user/mutation';
-import { GET_BOARD_ARTICLE } from '../../apollo/user/query';
+import { GET_BOARD_ARTICLE, GET_BOARD_ARTICLES } from '../../apollo/user/query';
 import { Message } from '../../libs/enums/common.enum';
 import { sweetMixinErrorAlert, sweetTopSmallSuccessAlert } from '../../libs/sweetAlert';
 
@@ -42,7 +42,7 @@ const Community: NextPage = ({ initialInput, ...props }: T) => {
 		error: boardArticlesError,
 		data: boardArticlesData,
 		refetch: boardArticlesRefetch,
-	} = useQuery(GET_BOARD_ARTICLE, {
+	} = useQuery(GET_BOARD_ARTICLES, {
 		fetchPolicy: 'network-only',
 		variables: {
 			input: searchCommunity,
